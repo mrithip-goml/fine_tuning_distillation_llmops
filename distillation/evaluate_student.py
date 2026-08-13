@@ -29,6 +29,8 @@ def _load_module(module_name, file_path):
 cfg = _load_module("distillation_config", os.path.join(THIS_DIR, "config.py"))
 ft_cfg = _load_module("fine_tuning_config", os.path.join(THIS_DIR, "..", "fine_tuning", "config.py"))
 
+DEFAULT_SYSTEM = "You are an expert ROS2, Robotics, and Linux Systems Engineer assistant. Provide accurate, practical, and clear technical responses."
+
 
 def load_eval_prompts(path):
     records = []
@@ -108,8 +110,11 @@ def main():
     for i, ex in enumerate(eval_prompts, 1):
         print(f"\n[{i}/{len(eval_prompts)}] {ex['prompt']}")
 
-        teacher_answer, teacher_latency = generate(teacher, teacher_tok, ex["system"], ex["prompt"])
-        student_answer, student_latency = generate(student, student_tok, ex["system"], ex["prompt"])
+        # Fallback safely to DEFAULT_SYSTEM if "system" key is missing in JSONL
+        system_prompt = ex.get("system", DEFAULT_SYSTEM)
+
+        teacher_answer, teacher_latency = generate(teacher, teacher_tok, system_prompt, ex["prompt"])
+        student_answer, student_latency = generate(student, student_tok, system_prompt, ex["prompt"])
 
         t_score = rouge_l(teacher_answer, ex["reference"])
         s_score = rouge_l(student_answer, ex["reference"])
@@ -147,8 +152,6 @@ def main():
 
     print(f"\n{'=' * 80}\nSUMMARY: {json.dumps(summary, indent=2)}")
     print(f"\nSaved full comparison to {out_path}")
-    print("This is the trade-off from Slide 21: quality gap vs. speed/size gain --")
-    print("decide per-project whether the cupcake is good enough for the occasion.")
 
 
 if __name__ == "__main__":

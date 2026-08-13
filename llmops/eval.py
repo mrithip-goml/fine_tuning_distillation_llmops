@@ -24,6 +24,8 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fine_tuning"))
 import config as ft_cfg  # noqa: E402
 
+DEFAULT_SYSTEM = "You are an expert ROS2, Robotics, and Linux Systems Engineer assistant. Provide accurate, practical, and clear technical responses."
+
 
 def load_eval_prompts(path):
     records = []
@@ -42,7 +44,7 @@ def rouge_l(prediction, reference):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Automated eval gate for the bakery assistant model.")
+    parser = argparse.ArgumentParser(description="Automated eval gate for the assistant model.")
     parser.add_argument("--model-path", default=os.environ.get("MODEL_PATH", ft_cfg.LORA_ADAPTER_DIR))
     parser.add_argument("--threshold", type=float, default=0.20,
                          help="Minimum average ROUGE-L to pass (fails the gate below this).")
@@ -65,7 +67,10 @@ def main():
     scores, latencies = [], []
 
     for ex in eval_prompts:
-        messages = [{"role": "system", "content": ex["system"]}, {"role": "user", "content": ex["prompt"]}]
+        # Fallback safely to DEFAULT_SYSTEM if "system" key is missing in JSONL
+        system_prompt = ex.get("system", DEFAULT_SYSTEM)
+
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": ex["prompt"]}]
         inputs = tokenizer.apply_chat_template(
             messages, tokenize=True, add_generation_prompt=True, return_tensors="pt"
         ).to(model.device)
