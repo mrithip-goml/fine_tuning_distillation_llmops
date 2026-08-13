@@ -7,20 +7,23 @@ end to end**, not to produce a state-of-the-art model.
 Sticking with the session's analogy: this repo bakes a **custom cake** (fine-tuning), bakes a
 **cupcake version** of it (distillation), and then **runs a bakery** around it (LLMOps).
 
-The task is a "bakery customer support assistant" — a small open model is fine-tuned to answer
-customer questions in a warm, on-brand voice for a fictional bakery. It's a deliberately simple,
-easy-to-inspect task so the *pipeline* stays the star, not the dataset.
+The task is a **ROS2, Robotics & Linux Systems Engineer assistant** — a small open model is
+fine-tuned to answer practical, technical questions about ROS2, robotics, and Linux systems in
+a clear, accurate, on-topic voice. It's a deliberately simple, easy-to-inspect task so the
+*pipeline* stays the star, not the dataset.
 
 ```
 unsloth-cake-demo/
 ├── data/
-│   └── sample_train.jsonl        # ~40 instruction examples (chat format)
+│   ├── sample_train.jsonl        # 240 instruction examples (chat format)
+│   └── eval_prompts.jsonl        # 20 held-out prompts with reference answers
 ├── fine_tuning/                  # ACT 1 — bake the custom cake (QLoRA with Unsloth)
 │   ├── config.py
 │   ├── train_lora.py
 │   ├── inference_compare.py
 │   └── README.md
 ├── distillation/                 # ACT 2 — bake the cupcake (teacher → student KD)
+│   ├── config.py
 │   ├── distill.py
 │   ├── evaluate_student.py
 │   └── README.md
@@ -74,7 +77,7 @@ else in this repo is CUDA-version agnostic.
 ```bash
 cd fine_tuning
 python train_lora.py                # QLoRA fine-tune, saves adapter to ./outputs/lora-adapter
-python inference_compare.py         # base vs fine-tuned, side by side, on 5 held-out prompts
+python inference_compare.py         # base vs fine-tuned, side by side, on 20 held-out prompts
 cd ..
 ```
 
@@ -100,7 +103,7 @@ uvicorn app:app --reload --port 8000
 # In another terminal:
 curl -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "Do you have any gluten-free cakes?"}'
+  -d '{"prompt": "How do I create a C++ ROS2 package with dependencies?"}'
 
 # Run the automated eval gate (mirrors what a CI step would run)
 python eval.py
