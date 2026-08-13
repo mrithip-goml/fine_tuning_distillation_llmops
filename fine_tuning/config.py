@@ -26,7 +26,7 @@ MERGED_MODEL_DIR = os.path.join(OUTPUT_DIR, "merged-model")
 # A small instruction-tuned model keeps this runnable on a single consumer GPU
 # (or even CPU, slowly) — swap for a larger unsloth/* model if you have more VRAM.
 MODEL_NAME = "unsloth/Llama-3.2-1B-Instruct-bnb-4bit"
-MAX_SEQ_LENGTH = 1024
+MAX_SEQ_LENGTH = 2048
 DTYPE = None          # None = auto-detect (bfloat16 on Ampere+, float16 otherwise)
 LOAD_IN_4BIT = True    # QLoRA. Set False if bitsandbytes/4-bit isn't available on your machine.
 
@@ -45,7 +45,7 @@ USE_GRADIENT_CHECKPOINTING = "unsloth"   # Unsloth's memory-efficient checkpoint
 # ---------------------------------------------------------------------------
 # Training hyperparameters — the "oven temperature and time"
 # ---------------------------------------------------------------------------
-NUM_TRAIN_EPOCHS = 3
+NUM_TRAIN_EPOCHS = 5
 PER_DEVICE_BATCH_SIZE = 2
 GRADIENT_ACCUMULATION_STEPS = 4
 LEARNING_RATE = 2e-4
