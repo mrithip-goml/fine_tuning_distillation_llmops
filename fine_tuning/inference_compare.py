@@ -20,6 +20,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import config as cfg
 
+DEFAULT_SYSTEM = "You are an expert ROS2, Robotics, and Linux Systems Engineer assistant. Provide accurate, practical, and clear technical responses."
+
 
 def load_eval_prompts(path):
     records = []
@@ -94,8 +96,11 @@ def main():
     for i, ex in enumerate(eval_prompts, 1):
         print(f"\n{'=' * 80}\n[{i}/{len(eval_prompts)}] PROMPT: {ex['prompt']}")
 
-        base_answer = generate(base_model, base_tok, ex["system"], ex["prompt"])
-        ft_answer = generate(ft_model, ft_tok, ex["system"], ex["prompt"])
+        # Fallback safely to DEFAULT_SYSTEM if "system" key is missing in JSONL
+        system_prompt = ex.get("system", DEFAULT_SYSTEM)
+
+        base_answer = generate(base_model, base_tok, system_prompt, ex["prompt"])
+        ft_answer = generate(ft_model, ft_tok, system_prompt, ex["prompt"])
 
         base_score = rouge_l(base_answer, ex["reference"])
         ft_score = rouge_l(ft_answer, ex["reference"])
@@ -122,8 +127,6 @@ def main():
     avg_ft = sum(r["fine_tuned_rouge_l"] or 0 for r in results) / len(results)
     print(f"\n{'=' * 80}\nAverage ROUGE-L  |  base: {avg_base:.3f}   fine-tuned: {avg_ft:.3f}")
     print(f"Saved full comparison to {out_path}")
-    print("\nRemember Slide 15's lesson: don't trust ROUGE-L alone -- read the actual")
-    print("answers above and judge tone, correctness, and whether it sounds like Crumb.")
 
 
 if __name__ == "__main__":

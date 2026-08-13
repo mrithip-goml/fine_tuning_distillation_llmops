@@ -45,7 +45,7 @@ USE_GRADIENT_CHECKPOINTING = "unsloth"   # Unsloth's memory-efficient checkpoint
 # ---------------------------------------------------------------------------
 # Training hyperparameters — the "oven temperature and time"
 # ---------------------------------------------------------------------------
-NUM_TRAIN_EPOCHS = 5
+NUM_TRAIN_EPOCHS = 4
 PER_DEVICE_BATCH_SIZE = 2
 GRADIENT_ACCUMULATION_STEPS = 4
 LEARNING_RATE = 2e-4
